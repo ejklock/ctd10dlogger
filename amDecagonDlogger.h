@@ -10,12 +10,11 @@
 #include "SPI.h"
 #include "Wire.h"
 #include "RTClib.h"
-
-#define DATALINE_PIN 9
-#define CS 10
-#define INVERTED 1
+#include  "avr/wdt.h" 
 
 void saveOnSd(char output_buffer[], char nomearquivo[], char dados[1][20]);
 void getSensorData();
 void initSensor();
+void checkHour();
 #endif //AMDECAGONDLOGGER_AMDECAGONDLOGGER_H
+
