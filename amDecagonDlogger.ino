@@ -1,11 +1,10 @@
 #include "amDecagonDlogger.h"
 #define Reset_AVR() wdt_enable(WDTO_30MS); while(1) {}
 RTC_DS1307 rtc;
+uint8_t d;
 
 void checkHour(){
-   DateTime d = rtc.now();
-   uint8_t h=d.hour();
-   if(h==23){
+   if(d!=rtc.now().day()){
     Serial.println("resetando..");
     Reset_AVR();
     }
@@ -15,7 +14,6 @@ void initSensor() {
   connection.begin();
   Serial.println("Iniciando Sistema"); // startup string echo'd to our uart
   delay(3000);
-  Serial.println(connection.sdi_query("0I!", 1000));
 }
 void getSensorData() {
   checkHour();
@@ -23,9 +21,9 @@ void getSensorData() {
   char output_buffer[255], nomearquivo[20], dados[1][20];
   connection.begin();
   DateTime d = rtc.now();
-  connection.sdi_query("0M!", 1000);
+  connection.sdi_query("?M!!", 1000);
   connection.wait_for_response(1000);
-  char* resposta = connection.sdi_query("0D0!", 1000);
+  char* resposta = connection.sdi_query("?D0!", 1000);
   strcpy(dados[0], resposta);
   Serial.print("Sensor 0:");
   Serial.println(resposta);
@@ -52,13 +50,9 @@ void getSensorData() {
     arquivo.close();
   }
 }
-
 void setup() {
   
   Serial.begin(115200); // start our uart
-//  while (!Serial) {
-//    ; // wait for serial port to connect. Needed for native USB port only
-//  }
   #ifdef AVR
   Wire.begin();
   #else
@@ -69,6 +63,7 @@ void setup() {
     Serial.println("RTC is NOT running!");
     rtc.adjust(DateTime(__DATE__, __TIME__));
   }
+  d=rtc.now().day();
   Serial.print("Testando Cartao...");
   pinMode(10, OUTPUT);
   if (!SD.begin(10)) {
@@ -76,9 +71,11 @@ void setup() {
     return;
   }
   initSensor();
+ 
+  
 }
 void loop() {
-  getSensorData();
-  delay(1000);
+ getSensorData();
+ delay(300000);
 }
 
